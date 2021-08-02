@@ -1,31 +1,53 @@
-import 'package:carPark/screens/add_places_screen.dart';
+import './AllScreens/carInfoScreen.dart';
+import './configMaps.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import './AllScreens/loginScreen.dart';
+import './AllScreens/mainscreen.dart';
+import './AllScreens/registerationScreen.dart';
+import './DataHandler/appData.dart';
 
-import './providers/carPark_list.dart';
-import './screens/places_list_screen.dart';
-import './screens/add_places_screen.dart';
+void main() async
+{
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
 
-void main() {
+  currentfirebaseUser = FirebaseAuth.instance.currentUser;
+
   runApp(MyApp());
 }
 
+DatabaseReference usersRef = FirebaseDatabase.instance.reference().child("users");
+DatabaseReference driversRef = FirebaseDatabase.instance.reference().child("drivers");
+DatabaseReference newRequestsRef = FirebaseDatabase.instance.reference().child("Ride Requests");
+DatabaseReference rideRequestRef = FirebaseDatabase.instance.reference().child("drivers").child(currentfirebaseUser.uid).child("newRide");
+
 class MyApp extends StatelessWidget {
+  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider.value(
-      value: CarParkList(),
+    return ChangeNotifierProvider(
+      create: (context) => AppData(),
       child: MaterialApp(
-        title: 'CarPark',
+        title: 'Taxi Driver App',
         theme: ThemeData(
-          primarySwatch: Colors.indigo,
-          primaryColor: Colors.amber,
+          primarySwatch: Colors.blue,
+          visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
-        home: PlacesListScreen(),
-        routes: {
-          AddPlaceScreen.routeName: (ctx) => AddPlaceScreen(),
+        initialRoute: FirebaseAuth.instance.currentUser == null ? LoginScreen.idScreen : MainScreen.idScreen,
+        routes:
+        {
+          RegisterationScreen.idScreen: (context) => RegisterationScreen(),
+          LoginScreen.idScreen: (context) => LoginScreen(),
+          MainScreen.idScreen: (context) => MainScreen(),
+          CarInfoScreen.idScreen: (context) => CarInfoScreen(),
         },
+        debugShowCheckedModeBanner: false,
       ),
     );
   }
 }
+
